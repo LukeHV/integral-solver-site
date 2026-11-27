@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, interactive-widget=resizes-content">
+<title>Integral Solver</title>
+<meta name="description" content="Solve indefinite and definite integrals with full step-by-step working: substitution, integration by parts, partial fractions, trig identities and more.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="vendor/katex/katex.min.css">
+<link rel="stylesheet" href="style.css">
+<link rel="icon" type="image/svg+xml" href="favicon.svg">
+</head>
+<body>
+<header class="masthead">
+  <div class="brand">
+    <svg class="mark" viewBox="0 0 40 40" aria-hidden="true"><rect width="40" height="40" rx="10"/><path d="M26 8.5c-2.6-1.4-5.4.2-6 3.6l-3.4 16.6c-.6 3.3-3.3 4.9-6 3.5" fill="none" stroke-width="2.6" stroke-linecap="round"/></svg>
+    <div>
+      <h1>Integral Solver</h1>
+      <p class="tag">Indefinite and definite integrals, with every step of the working.</p>
+    </div>
+  </div>
+  <button class="ghost" id="helpBtn" type="button" aria-haspopup="dialog">
+    <svg viewBox="0 0 20 20" aria-hidden="true"><circle cx="10" cy="10" r="8"/><path d="M7.8 7.6a2.3 2.3 0 1 1 3.3 2.1c-.7.3-1.1.9-1.1 1.6v.4"/><circle cx="10" cy="14.4" r=".6" class="dot"/></svg>
+    <span>How to type</span>
+  </button>
+</header>
+
+<main class="layout">
+  <div class="col-left">
+    <section class="card problem" aria-labelledby="problemTitle">
+      <h2 id="problemTitle" class="vh">Integral</h2>
+      <div class="modes" role="radiogroup" aria-label="Type of integral">
+        <button type="button" role="radio" aria-checked="true" data-mode="indefinite">Indefinite</button>
+        <button type="button" role="radio" aria-checked="false" tabindex="-1" data-mode="definite">Definite</button>
+      </div>
+
+      <div class="introw">
+        <span class="intsign" aria-hidden="true">∫</span>
+        <div class="bounds" id="bounds" hidden>
+          <input id="upper" class="bound" type="text" inputmode="text" autocomplete="off" spellcheck="false" aria-label="Upper limit" placeholder="b">
+          <input id="lower" class="bound" type="text" inputmode="text" autocomplete="off" spellcheck="false" aria-label="Lower limit" placeholder="a">
+        </div>
+        <input id="expr" type="text" autocomplete="off" autocapitalize="off" spellcheck="false" aria-label="Integrand" aria-describedby="msg" placeholder="e.g. x sin x">
+        <label class="dvar"><span aria-hidden="true">d</span><input id="var" type="text" maxlength="6" autocomplete="off" spellcheck="false" aria-label="Variable of integration" placeholder="x"></label>
+      </div>
+
+      <div class="preview" id="preview" aria-hidden="true"></div>
+      <p class="msg" id="msg" role="status" aria-live="polite"></p>
+
+      <div class="keypad" id="keypad" aria-label="Insert symbols">
+        <button type="button" data-ins="^" aria-label="Power">x<sup>n</sup></button>
+        <button type="button" data-ins="sqrt(" data-close=")" aria-label="Square root">√</button>
+        <button type="button" data-ins="/" aria-label="Divide">÷</button>
+        <button type="button" data-ins="(" data-close=")" aria-label="Brackets">( )</button>
+        <button type="button" data-ins="π" aria-label="Pi">π</button>
+        <button type="button" data-ins="e^(" data-close=")" aria-label="e to the power">e<sup>□</sup></button>
+        <button type="button" data-ins="sin(" data-close=")">sin</button>
+        <button type="button" data-ins="cos(" data-close=")">cos</button>
+        <button type="button" data-ins="tan(" data-close=")">tan</button>
+        <button type="button" data-ins="ln(" data-close=")">ln</button>
+        <button type="button" data-ins="|" data-close="|" aria-label="Absolute value">|□|</button>
+        <button type="button" data-ins="∞" data-bound="1" aria-label="Infinity (for limits)">∞</button>
+      </div>
+      <button type="button" class="primary" id="solveBtn">Solve</button>
+    </section>
+
+    <section class="card examples" aria-labelledby="exTitle">
+      <h2 id="exTitle">Examples</h2>
+      <div class="tabs" role="tablist" id="exTabs" aria-label="Example topics"></div>
+      <div class="chips" id="exList" role="tabpanel"></div>
+    </section>
+  </div>
+
+  <div class="col-right">
+    <section class="card answer" aria-labelledby="ansTitle" aria-live="polite">
+      <div class="ans-head">
+        <h2 id="ansTitle">Answer</h2>
+        <div class="ans-actions" id="ansActions" hidden>
+          <button type="button" class="ghost small" id="copyText">
+            <svg viewBox="0 0 20 20" aria-hidden="true"><rect x="6.5" y="6.5" width="10" height="10" rx="2"/><path d="M13.5 4.5v-.5a1.5 1.5 0 0 0-1.5-1.5H5A1.5 1.5 0 0 0 3.5 4v7A1.5 1.5 0 0 0 5 12.5h.5"/></svg>
+            <span>Copy</span></button>
+          <button type="button" class="ghost small" id="copyTex"><span>Copy LaTeX</span></button>
+        </div>
+      </div>
+      <div class="ans-math" id="ansMath"></div>
+      <p class="ans-text" id="ansText"></p>
+      <p class="check" id="check"></p>
+    </section>
+
+    <section class="card graph" aria-labelledby="gTitle">
+      <div class="g-head">
+        <h2 id="gTitle">Graph</h2>
+        <div class="legend" id="legend"></div>
+      </div>
+      <div class="fig" id="fig">
+        <canvas id="cv" tabindex="0" role="application" aria-roledescription="graph" aria-label="Graph of the integrand"></canvas>
+        <div class="readout" id="readout" hidden></div>
+        <div class="zoom" role="group" aria-label="Zoom">
+          <button type="button" class="zbtn" id="zIn" aria-label="Zoom in"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M10 5v10M5 10h10"/></svg></button>
+          <button type="button" class="zbtn" id="zOut" aria-label="Zoom out"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M5 10h10"/></svg></button>
+          <button type="button" class="zbtn" id="zReset" aria-label="Reset view"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M4.5 9.5a5.6 5.6 0 1 1 1.7 4.6"/><path d="M4 5.2v4.5h4.5"/></svg></button>
+        </div>
+      </div>
+      <p class="g-hint" id="gHint"></p>
+    </section>
+
+    <section class="card working" aria-labelledby="stTitle">
+      <div class="st-head">
+        <h2 id="stTitle">Working</h2>
+        <button type="button" class="ghost small" id="toggleAll" hidden>Collapse all</button>
+      </div>
+      <ol class="steps steps-top" id="steps"></ol>
+    </section>
+  </div>
+</main>
+
+<footer class="foot">Answers are checked by differentiating them; definite integrals are also checked numerically. <span class="nowrap">ln means natural log.</span></footer>
+
+<div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
+
+<dialog id="help" aria-labelledby="helpTitle">
+  <form method="dialog" class="dlg">
+    <div class="dlg-head">
+      <h2 id="helpTitle">How to type integrals</h2>
+      <button class="ghost icon" value="close" aria-label="Close">
+        <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M5 5l10 10M15 5L5 15"/></svg>
+      </button>
+    </div>
+    <p>Type maths the way you'd write it. The preview under the box shows how it has been read, so you can check before solving. A trailing <code>dx</code> is optional, <code>log</code> means base 10 (use <code>ln</code> for base <i>e</i>), and <code>ln</code>, <code>log</code>, <code>exp</code>, <code>abs</code>, <code>sqrt</code> and <code>cbrt</code> work with or without brackets.</p>
+    <table class="syntax">
+      <thead><tr><th>Type</th><th>Read as</th></tr></thead>
+      <tbody id="helpRows"></tbody>
+    </table>
+    <h3>Definite integrals</h3>
+    <p>Choose <b>Definite</b> and fill in the limits. Limits can be numbers, fractions, <code>pi/2</code>, <code>e</code>, <code>ln 2</code> or <code>inf</code> / <code>-inf</code> (or press ∞). If the integrand blows up inside the interval, the integral is split there and checked for divergence.</p>
+    <h3>What it can do</h3>
+    <p>Standard integrals, the reverse chain rule, substitution, integration by parts (including the cyclic kind), partial fractions, completing the square, trig identities and reduction formulas, and trig substitution. Letters other than the variable (like <code>a</code> or <code>k</code>) are treated as constants.</p>
+  </form>
+</dialog>
+
+<script src="vendor/katex/katex.min.js"></script>
+<script src="js/cas.js"></script>
+<script src="js/parse.js"></script>
+<script src="js/integrate.js"></script>
+<script src="js/solve.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>
